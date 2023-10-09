@@ -1,4 +1,5 @@
 import 'package:flutter/foundation.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
 
 import '../../get.dart';
@@ -75,6 +76,44 @@ mixin GetLifeCycleMixin {
 // that inherits GetLifeCycle.""";
 //     }
 //   }
+}
+
+mixin DisposableInterfaceRestoration on GetLifeCycleMixin {
+  void restoreState(Object? state);
+  Object? saveState();
+}
+
+class RestorableDisposableInterface
+    extends RestorableValue<DisposableInterfaceRestoration> {
+  RestorableDisposableInterface(this._defaultValue);
+
+  final DisposableInterfaceRestoration _defaultValue;
+
+  @override
+  DisposableInterfaceRestoration createDefaultValue() {
+    return _defaultValue;
+  }
+
+  @override
+  void didUpdateValue(DisposableInterfaceRestoration? oldValue) {
+    if (oldValue == null || oldValue != value) update();
+  }
+
+  @override
+  DisposableInterfaceRestoration fromPrimitives(Object? data) {
+    final controller = createDefaultValue();
+    controller.restoreState(data);
+    return controller;
+  }
+
+  @override
+  Object? toPrimitives() {
+    return value.saveState();
+  }
+
+  void update() {
+    notifyListeners();
+  }
 }
 
 /// Allow track difference between GetxServices and GetxControllers

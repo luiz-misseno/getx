@@ -1,9 +1,13 @@
+import 'dart:async';
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
+import 'package:get/get_state_manager/src/rx_flutter/rx_notifier.dart';
 
 import '../../../get_core/get_core.dart';
 import '../../../get_instance/src/get_instance.dart';
 import '../../../get_instance/src/lifecycle.dart';
+import '../../../get_rx/src/rx_types/rx_types.dart';
 import '../simple/list_notifier.dart';
 
 typedef GetXControllerBuilder<T extends GetLifeCycleMixin> = Widget Function(
@@ -20,6 +24,8 @@ class GetX<T extends GetLifeCycleMixin> extends StatefulWidget {
   final void Function(GetX oldWidget, GetXState<T> state)? didUpdateWidget;
   final T? init;
   final String? tag;
+  final bool restorable;
+  final String? restorationId;
 
   const GetX({
     this.tag,
@@ -34,6 +40,8 @@ class GetX<T extends GetLifeCycleMixin> extends StatefulWidget {
     this.didUpdateWidget,
     this.init,
     // this.streamController
+    this.restorable = false,
+    this.restorationId,
   });
 
   @override
@@ -52,12 +60,18 @@ class GetX<T extends GetLifeCycleMixin> extends StatefulWidget {
   }
 
   @override
-  GetXState<T> createState() => GetXState<T>();
+  GetXState<T> createState() =>
+      restorable ? RestorableGetXState<T>() : GetXState<T>();
 }
 
 class GetXState<T extends GetLifeCycleMixin> extends State<GetX<T>> {
+  GetXState() {
+    _observer = GetListenable(null);
+  }
+  RxInterface? _observer;
   T? controller;
   bool? _isCreator = false;
+  late StreamSubscription _subs;
 
   @override
   void initState() {
@@ -83,6 +97,7 @@ class GetXState<T extends GetLifeCycleMixin> extends State<GetX<T>> {
       controller?.onStart();
     }
 
+    _subs = _observer!.listen((data) => setState(() {}), cancelOnError: false);
     super.initState();
   }
 
@@ -114,7 +129,8 @@ class GetXState<T extends GetLifeCycleMixin> extends State<GetX<T>> {
     }
 
     disposers.clear();
-
+    _subs.cancel();
+    _observer?.close();
     controller = null;
     _isCreator = null;
     super.dispose();
@@ -137,5 +153,51 @@ class GetXState<T extends GetLifeCycleMixin> extends State<GetX<T>> {
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
     properties.add(DiagnosticsProperty<T>('controller', controller));
+  }
+}
+
+class RestorableGetXState<T extends GetLifeCycleMixin> extends GetXState<T>
+    with RestorationMixin {
+  late RestorableDisposableInterface _restorableController;
+
+  StreamSubscription? _changeSubscription;
+
+  @override
+  void initState() {
+    super.initState();
+
+    if (controller is DisposableInterfaceRestoration) {
+      _restorableController = RestorableDisposableInterface(
+        (controller as DisposableInterfaceRestoration),
+      );
+
+      _changeSubscription = _observer!.listen((event) {
+        _restorableController.update();
+      });
+    } else {
+      throw """
+      [Get] the improper use of a RestorableGetX has been detected. 
+      You should only use RestorableGetX with a controller which implements the DisposableInterfaceRestoration mixin.
+      """;
+    }
+  }
+
+  @override
+  void dispose() {
+    _changeSubscription?.cancel();
+    _restorableController.dispose();
+
+    super.dispose();
+  }
+
+  @override
+  String? get restorationId => widget.restorationId;
+
+  @override
+  void restoreState(RestorationBucket? oldBucket, bool initialRestore) {
+    // Register our property to be saved every time it,
+    // or some reactive value inside it changes,
+    // and to be restored every time our app is killed by the OS!
+    registerForRestoration(_restorableController, 'controller');
   }
 }

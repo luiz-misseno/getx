@@ -35,6 +35,9 @@ class GetPage<T> extends Page<T> {
   // RouteSettings get settings => this;
 
   @override
+  final String? restorationId;
+
+  @override
   final Object? arguments;
 
   @override
@@ -77,6 +80,7 @@ class GetPage<T> extends Page<T> {
         PreventDuplicateHandlingMode.ReorderRoutes,
     this.completer,
     LocalKey? key,
+    this.restorationId,
   })  : path = _nameToRegex(name),
         assert(name.startsWith('/'),
             'It is necessary to start route name [$name] with a slash: /$name'),
@@ -84,6 +88,7 @@ class GetPage<T> extends Page<T> {
           key: key ?? ValueKey(name),
           name: name,
           // arguments: Get.arguments,
+          restorationId: restorationId,
         );
   // settings = RouteSettings(name: name, arguments: Get.arguments);
 

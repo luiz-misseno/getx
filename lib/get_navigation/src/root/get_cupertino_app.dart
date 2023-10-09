@@ -62,6 +62,7 @@ class GetCupertinoApp extends StatelessWidget {
   final BackButtonDispatcher? backButtonDispatcher;
   final CupertinoThemeData? theme;
   final bool useInheritedMediaQuery;
+  final String? restorationScopeId;
   GetCupertinoApp({
     Key? key,
     this.theme,
@@ -114,6 +115,7 @@ class GetCupertinoApp extends StatelessWidget {
     this.highContrastTheme,
     this.highContrastDarkTheme,
     this.actions,
+    this.restorationScopeId,
   })  : routeInformationProvider = null,
         backButtonDispatcher = null,
         routeInformationParser = null,
@@ -178,6 +180,7 @@ class GetCupertinoApp extends StatelessWidget {
     this.getPages,
     this.navigatorObservers,
     this.unknownRoute,
+    this.restorationScopeId,
   })  : navigatorKey = null,
         onGenerateRoute = null,
         home = null,
