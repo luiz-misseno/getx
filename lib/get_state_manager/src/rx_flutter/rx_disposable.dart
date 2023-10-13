@@ -17,7 +17,7 @@ abstract class DisposableInterface extends GetLifeCycle {
   @mustCallSuper
   void onInit() {
     super.onInit();
-    SchedulerBinding.instance?.addPostFrameCallback((_) => onReady());
+    SchedulerBinding.instance.addPostFrameCallback((_) => onReady());
   }
 
   /// Called 1 frame after onInit(). It is the perfect place to enter
@@ -37,5 +37,43 @@ abstract class DisposableInterface extends GetLifeCycle {
   @override
   void onClose() {
     super.onClose();
+  }
+}
+
+mixin DisposableInterfaceRestoration on DisposableInterface {
+  void restoreState(Object? state);
+  Object? saveState();
+}
+
+class RestorableDisposableInterface
+    extends RestorableValue<DisposableInterfaceRestoration> {
+  RestorableDisposableInterface(this._defaultValue);
+
+  final DisposableInterfaceRestoration _defaultValue;
+
+  @override
+  DisposableInterfaceRestoration createDefaultValue() {
+    return _defaultValue;
+  }
+
+  @override
+  void didUpdateValue(DisposableInterfaceRestoration? oldValue) {
+    if (oldValue == null || oldValue != value) update();
+  }
+
+  @override
+  DisposableInterfaceRestoration fromPrimitives(Object? data) {
+    final controller = createDefaultValue();
+    controller.restoreState(data);
+    return controller;
+  }
+
+  @override
+  Object? toPrimitives() {
+    return value.saveState();
+  }
+
+  void update() {
+    notifyListeners();
   }
 }
