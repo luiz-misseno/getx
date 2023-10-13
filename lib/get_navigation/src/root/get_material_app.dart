@@ -66,6 +66,7 @@ class GetMaterialApp extends StatelessWidget {
   final RouterDelegate<Object>? routerDelegate;
   final BackButtonDispatcher? backButtonDispatcher;
   final bool useInheritedMediaQuery;
+  final String? restorationScopeId;
   const GetMaterialApp({
     Key? key,
     this.navigatorKey,
@@ -123,6 +124,7 @@ class GetMaterialApp extends StatelessWidget {
     this.highContrastTheme,
     this.highContrastDarkTheme,
     this.actions,
+    this.restorationScopeId,
   })  : routeInformationProvider = null,
         routeInformationParser = null,
         routerDelegate = null,
@@ -181,6 +183,7 @@ class GetMaterialApp extends StatelessWidget {
     this.getPages,
     this.navigatorObservers,
     this.unknownRoute,
+    this.restorationScopeId,
   })  : routerDelegate = routerDelegate ??= Get.createDelegate(
           notFoundRoute: unknownRoute,
         ),
@@ -272,6 +275,7 @@ class GetMaterialApp extends StatelessWidget {
                 debugShowCheckedModeBanner: debugShowCheckedModeBanner,
                 shortcuts: shortcuts,
                 scrollBehavior: scrollBehavior,
+                restorationScopeId: restorationScopeId,
                 useInheritedMediaQuery: useInheritedMediaQuery,
               )
             : MaterialApp(
@@ -319,6 +323,7 @@ class GetMaterialApp extends StatelessWidget {
                 debugShowCheckedModeBanner: debugShowCheckedModeBanner,
                 shortcuts: shortcuts,
                 scrollBehavior: scrollBehavior,
+                restorationScopeId: restorationScopeId,
                 useInheritedMediaQuery: useInheritedMediaQuery,
                 //   actions: actions,
               ),

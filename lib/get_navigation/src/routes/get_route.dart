@@ -35,6 +35,9 @@ class GetPage<T> extends Page<T> {
   @override
   final String name;
 
+  @override
+  final String? restorationId;
+
   final List<GetPage> children;
   final List<GetMiddleware>? middlewares;
   final PathDecoded path;
@@ -66,6 +69,7 @@ class GetPage<T> extends Page<T> {
     this.arguments,
     this.showCupertinoParallax = true,
     this.preventDuplicates = true,
+    this.restorationId,
   })  : path = _nameToRegex(name),
         assert(name.startsWith('/'),
             'It is necessary to start route name [$name] with a slash: /$name'),
@@ -73,6 +77,7 @@ class GetPage<T> extends Page<T> {
           key: ValueKey(name),
           name: name,
           arguments: Get.arguments,
+          restorationId: restorationId,
         );
   // settings = RouteSettings(name: name, arguments: Get.arguments);
 
